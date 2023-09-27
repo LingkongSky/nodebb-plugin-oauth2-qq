@@ -2,7 +2,7 @@
 
 /*
 	This file is located in the "modules" block of plugin.json
-	It is only loaded when the user navigates to /admin/plugins/quickstart page
+	It is only loaded when the user navigates to /admin/plugins/oauth2-qq page
 	It is not bundled into the min file that is served on the first load of the page.
 */
 
@@ -15,12 +15,12 @@ export function init() {
 };
 
 function handleSettingsForm() {
-	load('quickstart', $('.quickstart-settings'), function () {
+	load('oauth2-qq', $('.oauth2-qq-settings'), function () {
 		setupColorInputs();
 	});
 
 	$('#save').on('click', () => {
-		save('quickstart', $('.quickstart-settings')); // pass in a function in the 3rd parameter to override the default success/failure handler
+		save('oauth2-qq', $('.oauth2-qq-settings')); // pass in a function in the 3rd parameter to override the default success/failure handler
 	});
 }
 
@@ -44,7 +44,7 @@ function setupUploader() {
 			uploader.show({
 				route: config.relative_path + '/api/admin/upload/file',
 				params: {
-					folder: 'quickstart',
+					folder: 'oauth2-qq',
 				},
 				accept: 'image/*',
 			}, function (image) {

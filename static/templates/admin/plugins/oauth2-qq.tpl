@@ -3,13 +3,13 @@
 
 	<div class="row m-0">
 		<div id="spy-container" class="col-12 col-md-8 px-0 mb-4" tabindex="0">
-			<form role="form" class="quickstart-settings">
+			<form role="form" class="oauth2-qq-settings">
 				<div class="mb-4">
 					<h5 class="fw-bold tracking-tight settings-header">General</h5>
 
 					<p class="lead">
 						Adjust these settings. You can then retrieve these settings in code via:
-						<br/><code>await meta.settings.get('quickstart');</code>
+						<br/><code>await meta.settings.get('oauth2-qq');</code>
 					</p>
 					<div class="mb-3">
 						<label class="form-label" for="setting-1">Setting 1</label>
@@ -45,7 +45,7 @@
 				<div class="mb-4">
 					<h5 class="fw-bold tracking-tight settings-header">Sorted List</h5>
 
-					<div class="mb-3" data-type="sorted-list" data-sorted-list="sample-list" data-item-template="admin/plugins/quickstart/partials/sorted-list/item" data-form-template="admin/plugins/quickstart/partials/sorted-list/form">
+					<div class="mb-3" data-type="sorted-list" data-sorted-list="sample-list" data-item-template="admin/plugins/oauth2-qq/partials/sorted-list/item" data-form-template="admin/plugins/oauth2-qq/partials/sorted-list/form">
 						<ul data-type="list" class="list-group mb-2"></ul>
 						<button type="button" data-type="add" class="btn btn-info">Add Item</button>
 					</div>

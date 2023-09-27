@@ -1,6 +1,6 @@
 {
-	"id": "nodebb-plugin-quickstart",
-	"url": "https://github.com/NodeBB/nodebb-plugin-quickstart",
+	"id": "nodebb-plugin-oauth2-qq",
+	"url": "https://github.com/NodeBB/nodebb-plugin-oauth2-qq",
 	"library": "./library.js",
 	"hooks": [
 		{ "hook": "static:app.load", "method": "init" },
@@ -11,17 +11,10 @@
 		"static": "./static"
 	},
 	"scss": [
-		"static/scss/quickstart.scss"
-	],
-	"scripts": [
-		"static/lib/main.js"
-	],
-	"acpScripts": [
-		"static/lib/acp-main.js"
+		"static/scss/oauth2-qq.scss"
 	],
 	"modules": {
-		"../client/quickstart.js": "./static/lib/quickstart.js",
-		"../admin/plugins/quickstart.js": "./static/lib/admin.js"
+		"../admin/plugins/oauth2-qq.js": "./static/lib/admin.js"
 	},
 	"templates": "static/templates"
 }
