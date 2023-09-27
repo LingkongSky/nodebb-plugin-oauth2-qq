@@ -3,9 +3,34 @@
 	"url": "https://github.com/NodeBB/nodebb-plugin-oauth2-qq",
 	"library": "./library.js",
 	"hooks": [
-		{ "hook": "static:app.load", "method": "init" },
-		{ "hook": "static:api.routes", "method": "addRoutes" },
-		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" }
+		{
+			"hook": "static:app.load",
+			"method": "init"
+		},
+		{
+			"hook": "static:api.routes",
+			"method": "addRoutes"
+		},
+		{
+			"hook": "filter:admin.header.build",
+			"method": "addAdminNavigation"
+		},
+		{
+			"hook": "filter:auth.init",
+			"method": "getStrategy"
+		},
+		{
+			"hook": "filter:auth.list",
+			"method": "getAssociation"
+		},
+		{
+			"hook": "static:user.delete",
+			"method": "deleteUserData"
+		},
+		{
+			"hook": "filter:user.whitelistFields",
+			"method": "appendUserHashWhitelist"
+		}
 	],
 	"staticDirs": {
 		"static": "./static"

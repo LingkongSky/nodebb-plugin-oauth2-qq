@@ -7,7 +7,6 @@
 */
 
 import { save, load } from 'settings';
-import * as uploader from 'uploader';
 
 export function init() {
 	handleSettingsForm();
@@ -21,35 +20,5 @@ function handleSettingsForm() {
 
 	$('#save').on('click', () => {
 		save('oauth2-qq', $('.oauth2-qq-settings')); // pass in a function in the 3rd parameter to override the default success/failure handler
-	});
-}
-
-function setupColorInputs() {
-	var colorInputs = $('[data-settings="colorpicker"]');
-	colorInputs.on('change', updateColors);
-	updateColors();
-}
-
-function updateColors() {
-	$('#preview').css({
-		color: $('#color').val(),
-		'background-color': $('#bgColor').val(),
-	});
-}
-
-function setupUploader() {
-	$('#content input[data-action="upload"]').each(function () {
-		var uploadBtn = $(this);
-		uploadBtn.on('click', function () {
-			uploader.show({
-				route: config.relative_path + '/api/admin/upload/file',
-				params: {
-					folder: 'oauth2-qq',
-				},
-				accept: 'image/*',
-			}, function (image) {
-				$('#' + uploadBtn.attr('data-target')).val(image);
-			});
-		});
 	});
 }
