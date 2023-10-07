@@ -41,5 +41,6 @@
 	"modules": {
 		"../admin/plugins/oauth2-qq.js": "./static/lib/admin.js"
 	},
-	"templates": "static/templates"
+	"templates": "static/templates",
+	"languages": "static/languages"
 }

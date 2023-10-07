@@ -10,14 +10,6 @@ const controllers = require('./lib/controllers');
 const routeHelpers = require.main.require('./src/routes/helpers');
 
 
-var User = require.main.require('./src/user');
-var db = require.main.require('./src/database');
-var async = require.main.require('async');
-var passport = require.main.require('passport');
-var GithubStrategy = require('passport-github2').Strategy;
-var authenticationController = require.main.require('./src/controllers/authentication');
-
-
 
 const plugin = {};
 
@@ -54,6 +46,23 @@ plugin.init = async (params) => {
 
 
 
+
+
+plugin.load = async function (params) {
+	const settings = await meta.settings.get('oauth2-qq');
+	if (!settings) {
+		winston.warn(`[plugins/${pluginData.nbbId}] Settings not set or could not be retrieved!`);
+		return;
+	}
+
+	
+	pluginSettings = settings;
+/*
+	const routeHelpers = require.main.require('./src/routes/helpers');
+	routeHelpers.setupAdminPageRoute(params.router, `/admin/plugins/${pluginData.nbbId}`, renderAdmin);
+
+	*/
+};
 
 
 

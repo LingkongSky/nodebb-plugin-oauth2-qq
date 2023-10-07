@@ -10,12 +10,12 @@ import { save, load } from 'settings';
 
 export function init() {
 	handleSettingsForm();
-	setupUploader();
+	//setupUploader();
 };
 
 function handleSettingsForm() {
 	load('oauth2-qq', $('.oauth2-qq-settings'), function () {
-		setupColorInputs();
+		//setupColorInputs();
 	});
 
 	$('#save').on('click', () => {

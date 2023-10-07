@@ -5,37 +5,39 @@
 		<div id="spy-container" class="col-12 col-md-8 px-0 mb-4" tabindex="0">
 			<form role="form" class="oauth2-qq-settings">
 				<div class="mb-4">
-					<h5 class="fw-bold tracking-tight settings-header">General</h5>
+					<h5 class="fw-bold tracking-tight settings-header">[[oauth2-qq:General]]</h5>
 
 			<div class="alert alert-info">
-				Register a new <strong>GitHub Application</strong> via
-				<a href="https://github.com/settings/developers">Developer Applications</a> and then paste your application details here.
+			[[oauth2-qq:alertInfo]]
 			</div>
 			
-					<p class="lead">
+					<p class="lead" style="font-size: 1rem !important;">
+					[[oauth2-qq:leadInfo]]
+						<!--div>
 						Adjust these settings. You can then retrieve these settings in code via:
 						<br/><code>await meta.settings.get('oauth2-qq');</code>
+						</div-->
 					</p>
 					<div class="mb-3">
-						<label class="form-label" for="setting-1">Setting 1</label>
-						<input type="text" id="setting-1" name="setting-1" title="Setting 1" class="form-control" placeholder="Setting 1">
+						<label class="form-label" for="setting-id">APP ID</label>
+						<input type="text" id="setting-id" name="setting-id" title="APP ID" class="form-control" placeholder="APP ID">
 					</div>
 
 
 					<div class="mb-3">
-						<label class="form-label" for="setting-2">Setting 2</label>
-						<input type="text" id="setting-2" name="setting-2" title="Setting 2" class="form-control" placeholder="Setting 2">
+						<label class="form-label" for="setting-key">APP Key</label>
+						<input type="text" id="setting-key" name="setting-key" title="APP Key" class="form-control" placeholder="APP Key">
 					</div>
 
 					<div class="mb-3">
-						<label class="form-label" for="setting-3">Setting 2</label>
-						<input type="text" id="setting-3" name="setting-3" title="Setting 3" class="form-control" placeholder="Setting 3">
+						<label class="form-label" for="setting-url">Callback URL</label>
+						<input type="text" id="setting-url" name="setting-url" title="Callback URL" class="form-control" placeholder="Callback URL">
 					</div>
 
 
 					<div class="form-check form-switch">
-						<input type="checkbox" class="form-check-input" id="setting-3" name="setting-3">
-						<label for="setting-3" class="form-check-label">Setting 3</label>
+						<input type="checkbox" class="form-check-input" id="setting-login" name="setting-login">
+						<label for="setting-login" class="form-check-label">[[oauth2-qq:enableLogin]]</label>
 					</div>
 				</div>
 

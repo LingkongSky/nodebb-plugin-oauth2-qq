@@ -1,1 +1,6 @@
-{}
+{
+    "General": "常规",
+    "alertInfo": "前往<a href='https://connect.qq.com/manage.html#/'>腾讯互联</a>注册<strong>第三方网站</strong>并将你的APP ID与密钥粘贴到下面。",
+    "leadInfo": "在表单中写入你的APP ID，密钥及回调地址。",
+    "enableLogin": "启用QQ互联登录"
+}

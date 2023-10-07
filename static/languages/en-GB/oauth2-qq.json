@@ -1,1 +1,6 @@
-{}
+{
+    "General": "General",
+    "alertInfo": "Register a new <strong>GitHub Application</strong> via <a href='https: //github.com/settings/developers'>Developer Applications</a> and then paste your application details here.",
+    "leadInfo": "write your app ID,Key and Callback URL into the form.",
+    "enableLogin": "Enable Login"
+}
