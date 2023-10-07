@@ -13,7 +13,7 @@
 		},
 		{
 			"hook": "filter:admin.header.build",
-			"method": "addAdminNavigation"
+			"method": "addMenuItem"
 		},
 		{
 			"hook": "filter:auth.init",
@@ -36,11 +36,11 @@
 		"static": "./static"
 	},
 	"scss": [
-		"static/scss/oauth2-qq.scss"
+		"./static/scss/oauth2-qq.scss"
 	],
 	"modules": {
 		"../admin/plugins/oauth2-qq.js": "./static/lib/admin.js"
 	},
-	"templates": "static/templates",
-	"languages": "static/languages"
+	"templates": "./static/templates",
+	"languages": "./static/languages"
 }

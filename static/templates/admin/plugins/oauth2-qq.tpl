@@ -13,30 +13,26 @@
 			
 					<p class="lead" style="font-size: 1rem !important;">
 					[[oauth2-qq:leadInfo]]
-						<!--div>
-						Adjust these settings. You can then retrieve these settings in code via:
-						<br/><code>await meta.settings.get('oauth2-qq');</code>
-						</div-->
 					</p>
 					<div class="mb-3">
 						<label class="form-label" for="setting-id">APP ID</label>
-						<input type="text" id="setting-id" name="setting-id" title="APP ID" class="form-control" placeholder="APP ID">
+						<input type="text" id="setting-id" name="id" title="APP ID" class="form-control" placeholder="APP ID">
 					</div>
 
 
 					<div class="mb-3">
 						<label class="form-label" for="setting-key">APP Key</label>
-						<input type="text" id="setting-key" name="setting-key" title="APP Key" class="form-control" placeholder="APP Key">
+						<input type="text" id="setting-key" name="key" title="APP Key" class="form-control" placeholder="APP Key">
 					</div>
 
 					<div class="mb-3">
 						<label class="form-label" for="setting-url">Callback URL</label>
-						<input type="text" id="setting-url" name="setting-url" title="Callback URL" class="form-control" placeholder="Callback URL">
+						<input type="text" id="setting-url" name="url" title="Callback URL" class="form-control" placeholder="Callback URL">
 					</div>
 
 
 					<div class="form-check form-switch">
-						<input type="checkbox" class="form-check-input" id="setting-login" name="setting-login">
+						<input type="checkbox" class="form-check-input" id="login" name="setting-login">
 						<label for="setting-login" class="form-check-label">[[oauth2-qq:enableLogin]]</label>
 					</div>
 				</div>
@@ -45,6 +41,5 @@
 			</form>
 		</div>
 
-		<!-- IMPORT admin/partials/settings/toc.tpl -->
 	</div>
 </div>

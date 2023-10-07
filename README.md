@@ -1,17 +1,10 @@
-# Quickstart Plugin for NodeBB
+# NODEBB-PLUGIN-OAUTH-QQ
+This plugin work on Nodebb V3.x,support user login & register via Tencent.
 
-A starter kit for quickly creating NodeBB plugins. Comes with a pre-setup LESS file, server side JS script with an `action:app.load` hook, and a client-side script. Most plugins need at least one of the above, so this ought to save you some time. For a full list of hooks have a look at our [wiki page](https://github.com/NodeBB/NodeBB/wiki/Hooks), and for more information about creating plugins please visit our [documentation portal](https://docs.nodebb.org/).
+本插件适用于Nodebb V3.x，支持用户通过腾讯互联进行登录 & 注册。
 
-Fork this or copy it, and using your favourite text editor find and replace all instances of `nodebb-plugin-quickstart` with `nodebb-plugin-your-plugins-name`. Change the author's name in the LICENSE and package.json files.
-
-## Hello World
-
-Really simple, just edit `static/lib/main.js` and paste in `console.log('hello world');`, and that's it!
-
-## Installation
-
-    npm install nodebb-plugin-quickstart
-
-## Screenshots
-
-Don't forget to add screenshots!
+# SEE ALSO
+https://github.com/julianlam/nodebb-plugin-sso-oauth
+https://github.com/julianlam/nodebb-plugin-sso-google
+https://github.com/julianlam/nodebb-plugin-sso-github
+https://github.com/NodeBB/nodebb-plugin-quickstart
