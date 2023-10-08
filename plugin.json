@@ -33,7 +33,8 @@
 		}
 	],
 	"staticDirs": {
-		"static": "./static"
+		"static": "./static",
+		"images": "./static/images"
 	},
 	"scss": [
 		"./static/scss/oauth2-qq.scss"
