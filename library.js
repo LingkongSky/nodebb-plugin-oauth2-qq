@@ -2,7 +2,7 @@
 (function (module) {
 
     const User = require.main.require('./src/user');
-    const Groups = require.main.require('./src/groups');
+   // const Groups = require.main.require('./src/groups');
     const db = require.main.require('./src/database');
     const authenticationController = require.main.require('./src/controllers/authentication');
     const meta = require.main.require('./src/meta');
@@ -124,13 +124,13 @@
                     done(e)
                 }
                 if (profile.ret === -1) { // Try Catch Error
-                    winston.error('[SSO-QQ]The Profile return -1,skipped.')
+                    winston.error('[OAuth2-qq]The Profile return -1,skipped.')
                     return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."))
                 }
 
                 // 存储头像信息
                 let avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2 // Set avatar image
-                avatar = avatar.replace('http://', 'https://')
+                avatar = avatar.replace('http://', 'https://');
                 // 如果用户已经登录，那么我们就绑定他
                 if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
                     // 如果用户想重复绑定的话，我们就拒绝他。
@@ -140,14 +140,14 @@
                             return done(err)
                         } else {
                             if (res) {
-                                winston.error('[sso-qq] qqid:' + profile.id + 'is binded.')
+                                winston.error('[OAuth2-qq] qqid:' + profile.id + 'is binded.')
                                 // qqid is exist
                                 return done(new Error('[[error:sso-multiple-association]]'))
                             } else {
                                 User.setUserField(req.user.uid, 'qqid', profile.id)
                                 db.setObjectField('qqid:uid', profile.id, req.user.uid)
                                 User.setUserField(req.user.uid, 'qqpic', avatar)
-                                winston.info('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')')
+                                winston.info('[OAuth2-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')')
                                 return done(null, req.user)
                             }
                         }
@@ -260,39 +260,39 @@
             if (err) {
                 return callback(err)
             }
-
-            // winston.verbose("[SSO-QQ]uid:" + uid);
+            // winston.verbose("[OAuth2-qq]uid:" + uid);
             if (uid !== null) {
                 // Existing User
-                winston.info('[SSO-QQ]User:' + uid + ' is logged via sso-qq')
+                winston.info('[OAuth2-qq]User:' + uid + ' is logged via OAuth2-qq')
                 User.setUserField(uid, 'qqpic', avatar) // 更新头像
                 callback(null, {
                     uid: uid
                 })
             } else {
+                //New User
                 // 为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
-                winston.info("[SSO-QQ]User isn't Exist.Try to Creat a new account.")
-                winston.info("[SSO-QQ]New Account's Username：" + username + ' and openid:' + qqID)
+                winston.info("[OAuth2-qq]User isn't Exist.Try to Creat a new account.")
+                winston.info("[OAuth2-qq]New Account's Username：" + username + ' and openid:' + qqID)
                 // New User
                 // From SSO-Twitter
                 User.create({
                     username: username,
-                    email: email
+               //     email: email
                 }, function (err, uid) {
                     if (err) {
                         User.create({
                             username: 'qq-' + qqID,
-                            email: email
+                      //      email: email
                         }, function (err, uid) {
                             if (err) {
                                 return callback(err)
                             } else {
                                 // Save qq-specific information to the user
-                                User.setUserField(uid, 'qqid', qqID)
-                                db.setObjectField('qqid:uid', qqID, uid)
+                                User.setUserField(uid, 'qqid', qqID);
+                                db.setObjectField('qqid:uid', qqID, uid);
                                 // Save their photo, if present
-                                User.setUserField(uid, 'picture', avatar)
-                                User.setUserField(uid, 'qqpic', avatar)
+                            //    User.setUserField(uid, 'picture', avatar);
+                             //   User.setUserField(uid, 'qqpic', avatar);
                                 callback(null, {
                                     uid: uid
                                 })
@@ -300,11 +300,11 @@
                         })
                     } else {
                         // Save qq-specific information to the user
-                        User.setUserField(uid, 'qqid', qqID)
-                        db.setObjectField('qqid:uid', qqID, uid)
+                        User.setUserField(uid, 'qqid', qqID);
+                        db.setObjectField('qqid:uid', qqID, uid);
                         // Save their photo, if present
-                        User.setUserField(uid, 'picture', avatar)
-                        User.setUserField(uid, 'qqpic', avatar)
+                      //  User.setUserField(uid, 'picture', avatar);
+                      //  User.setUserField(uid, 'qqpic', avatar);
                         callback(null, {
                             uid: uid
                         })
@@ -336,17 +336,20 @@
         //   - uid and qqid are set in session
         //   - email ends with "@noreply.qq.com"
         if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
+
+
             User.getUserField(data.userData.uid, 'email', function (err, email) {
                 if (err) {
                     return callback(err)
                 }
-                if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
+
+               /* if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
                     data.interstitials.push({
-                        template: 'partials/sso-qq/email.tpl',
+                        template: 'partials/oauth2-qq/email.tpl',
                         data: {},
-                        callback: QQ.storeAdditionalData
+                        callback: OAuth.storeAdditionalData
                     })
-                }
+                }*/
 
                 callback(null, data)
             })
@@ -354,6 +357,8 @@
             callback(null, data)
         }
     }
+
+    /*
     OAuth.get = (data, callback) => {
         if (data.type === 'qq') {
             OAuth.getQQPicture(data.uid, function (err, QQPicture) {
@@ -362,7 +367,7 @@
                     return callback(null, data)
                 }
                 if (QQPicture == null) {
-                    winston.error('[sso-qq]uid:' + data.uid + 'is invalid,skipping...')
+                    winston.error('[OAuth2-qq]uid:' + data.uid + 'is invalid,skipping...')
                     return callback(null, data)
                 }
                 data.picture = QQPicture
@@ -372,6 +377,9 @@
             callback(null, data)
         }
     }
+
+
+
     OAuth.list = (data, callback) => {
         OAuth.getQQPicture(data.uid, function (err, QQPicture) {
             if (err) {
@@ -379,7 +387,7 @@
                 return callback(null, data)
             }
             if (QQPicture == null) {
-                winston.error('[sso-qq]uid:' + data.uid + 'is invalid,skipping...')
+                winston.error('[OAuth2-qq]uid:' + data.uid + 'is invalid,skipping...')
                 return callback(null, data)
             }
             data.pictures.push({
@@ -399,6 +407,9 @@
             callback(null, pic)
         })
     }
+*/
+
+
 
     OAuth.storeAdditionalData = function (userData, data, callback) {
         async.waterfall([
