@@ -27,12 +27,12 @@
 
 					<div class="mb-3">
 						<label class="form-label" for="setting-url">Callback URL</label>
-						<input type="text" id="setting-url" name="url" title="Callback URL" class="form-control" placeholder="Callback URL">
+						<input type="text" disabled  id="setting-url" name="url" title="Callback URL" class="form-control" placeholder="{baseUrl}/auth/qq/callback">
 					</div>
 
 
 					<div class="form-check form-switch">
-						<input type="checkbox" class="form-check-input" id="login" name="setting-login">
+						<input type="checkbox" class="form-check-input" id="login" name="login">
 						<label for="setting-login" class="form-check-label">[[oauth2-qq:enableLogin]]</label>
 					</div>
 				</div>

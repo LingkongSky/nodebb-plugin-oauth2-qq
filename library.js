@@ -28,6 +28,7 @@
     });
 
 
+    meta.settings.get('oauth2-qq', function (err, settings) {
 
     if (!constants.name) {
         winston.error('[sso-oauth] Please specify a name for your OAuth provider (library.js:32)');
@@ -35,10 +36,10 @@
         winston.error('[sso-oauth] Please specify an OAuth strategy to utilise (library.js:31)');
     } else if (!constants.userRoute) {
         winston.error('[sso-oauth] User Route required (library.js:31)');
-    } else {
+    } else if (settings.login === 'on') {
         configOk = true;
     }
-
+    });
 
     OAuth.init = function (data, callback) {
 
@@ -89,9 +90,7 @@
                 })
             })
         })
-
             callback();
-
     };
 
     OAuth.addMenuItem = function (custom_header, callback) {
@@ -256,6 +255,7 @@
     
 
     OAuth.login = function (qqID, username, avatar, email, callback) {
+
         OAuth.getUidByQQid(qqID, function (err, uid) {
             if (err) {
                 return callback(err)

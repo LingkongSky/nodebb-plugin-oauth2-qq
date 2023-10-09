@@ -5,6 +5,7 @@ This plugin work on Nodebb V3.x,support user login & register via Tencent.
 
 # SEE ALSO
 https://github.com/julianlam/nodebb-plugin-sso-oauth
+https://github.com/NodeBB-China/nodebb-plugin-sso-qq-fix
 https://github.com/julianlam/nodebb-plugin-sso-google
 https://github.com/julianlam/nodebb-plugin-sso-github
 https://github.com/NodeBB/nodebb-plugin-quickstart
