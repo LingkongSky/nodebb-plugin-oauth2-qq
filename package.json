@@ -1,11 +1,11 @@
 {
   "name": "nodebb-plugin-oauth2-qq",
   "version": "0.4.3",
-  "description": "A starter kit for quickly creating NodeBB plugins",
+  "description": "This plugin work on Nodebb V3.x,support user login & register via Tencent.",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nodebb/nodebb-plugin-oauth2-qq"
+    "url": "https://github.com/LingkongSky/nodebb-plugin-oauth2-qq"
   },
   "keywords": [
     "nodebb",
@@ -27,7 +27,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nodebb/nodebb-plugin-oauth2-qq/issues"
+    "url": "https://github.com/LingkongSky/nodebb-plugin-oauth2-qq/issues"
   },
   "readmeFilename": "README.md",
   "nbbpm": {

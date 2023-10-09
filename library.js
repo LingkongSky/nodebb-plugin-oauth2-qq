@@ -1,25 +1,12 @@
 'use strict';
 (function (module) {
-    /*
-            Welcome to the SSO OAuth plugin! If you're inspecting this code, you're probably looking to
-            hook up NodeBB with your existing OAuth endpoint.
-    
-            Step 1: Fill in the "constants" section below with the requisite informaton. Either the "oauth"
-                    or "oauth2" section needs to be filled, depending on what you set "type" to.
-    
-            Step 2: Give it a whirl. If you see the congrats message, you're doing well so far!
-    
-            Step 3: Customise the `parseUserReturn` method to normalise your user route's data return into
-                    a format accepted by NodeBB. Instructions are provided there. (Line 146)
-    
-            Step 4: If all goes well, you'll be able to login/register via your OAuth endpoint credentials.
-        */
 
     const User = require.main.require('./src/user');
     const Groups = require.main.require('./src/groups');
     const db = require.main.require('./src/database');
     const authenticationController = require.main.require('./src/controllers/authentication');
     const meta = require.main.require('./src/meta');
+    const QQStrategy = require('passport-qq2015-fix').Strategy
 
     const async = require('async');
 
@@ -27,35 +14,17 @@
     const nconf = require.main.require('nconf');
     const winston = require.main.require('winston');
 
-    /**
-         * REMEMBER
-         *   Never save your OAuth Key/Secret or OAuth2 ID/Secret pair in code! It could be published and leaked accidentally.
-         *   Save it into your config.json file instead:
-         *
-         *   {
-         *     ...
-         *     "oauth": {
-         *       "id": "someoauthid",
-         *       "secret": "youroauthsecret"
-         *     }
-         *     ...
-         *   }
-         *
-         *   ... or use environment variables instead:
-         *
-         *   `OAUTH__ID=someoauthid OAUTH__SECRET=youroauthsecret node app.js`
-         */
+    
 
     const OAuth = {};
     let configOk = false;
-    let passportOAuth;
-    let opts;
+  
 
 
     const constants = Object.freeze({
         type: 'oauth2', // Either 'oauth' or 'oauth2'
-        name: 'QQ', // Something unique to your OAuth provider in lowercase, like "github", or "nodebb"
-        userRoute: '/auth/QQ', // This is the address to your app's "user profile" API endpoint (expects JSON)
+        name: 'qq', // Something unique to your OAuth provider in lowercase, like "github", or "nodebb"
+        userRoute: '/plugins/oauth2-qq/', // This is the address to your app's "user profile" API endpoint (expects JSON)
     });
 
 
@@ -84,37 +53,51 @@
 
         hostHelpers.setupPageRoute(data.router, '/deauth/qq', [data.middleware.requireUser], (req, res) => {
             res.render('plugins/oauth2-qq/deauth', {
-                service: 'QQ',
+                service: 'qq',
             });
         });
-        data.router.post('/deauth/qq', [data.middleware.requireUser, data.middleware.applyCSRF], (req, res, next) => {
 
+        function renderAdmin(req, res) {
+            res.render('admin/plugins/oauth2-qq', {
+                callbackURL: nconf.get('url') + '/auth/qq/callback'
+            })
+        }
+
+
+        data.router.get('/admin/plugins/oauth2-qq', data.middleware.admin.buildHeader, renderAdmin)
+        data.router.get('/api/admin/plugins/oauth2-qq', renderAdmin)
+
+        data.router.get('/auth/qq/callback', function (req, res, next) {
+            req.query.state = req.session.ssoState
+            next()
+        })
+
+
+
+        data.router.post('/deauth/qq', [data.middleware.requireUser, data.middleware.applyCSRF], function (req, res, next) {
             OAuth.deleteUserData({
-                uid: req.user.uid,
-            }, (err) => {
+                uid: req.user.uid
+            }, function (err, uid) {
                 if (err) {
-                    return next(err);
+                    return next(err)
                 }
-
-                res.redirect(`${nconf.get('relative_path')}/me/edit`);
-            });
-
-        });
-
-
-        meta.settings.get('oauth2-qq', (_, loadedSettings) => {
+                User.getUserField(uid, 'userslug', function (err, userslug) {
+                    if (err) {
+                        return next(err)
+                    }
+                    res.redirect(nconf.get('relative_path') + '/user/' + userslug + '/edit')
+                })
+            })
+        })
 
             callback();
-        });
-
-
 
     };
 
     OAuth.addMenuItem = function (custom_header, callback) {
         custom_header.authentication.push({
             route: "/plugins/oauth2-qq",
-            icon: 'fa-tint',
+            icon: 'fa-qq',
             name: 'OAuth2 QQ',
         });
 
@@ -124,79 +107,96 @@
 
 
 
-
-
-
-
     OAuth.getStrategy = function (strategies, callback) {
         if (configOk) {
 
-            passportOAuth = require('passport-oauth')['OAuth2Strategy'];
-            meta.settings.get('oauth2-qq', function (err, settings){
-
-
-          
-            // OAuth 2 options
-            opts = {
-                authorizationURL: 'https://graph.qq.com/oauth2.0/authorize',
-                tokenURL: 'https://graph.qq.com/oauth2.0/token',
+          //  passportOAuth = require('passport-oauth')['OAuth2Strategy'];
+        meta.settings.get('oauth2-qq', function (err, settings){
+  
+            passport.use(constants.name, new QQStrategy({
                 clientID: settings.id, //读取管理面板设置
                 clientSecret: settings.key, // don't change this line
-            };
-            opts.callbackURL = `${nconf.get('url')}/auth/${constants.name}/callback`;
+                callbackURL: nconf.get('url') + "/auth/" + constants.name +"/callback",
+                passReqToCallback: true
+                    }, function (req, accessToken, refreshToken, profile, done) {
+                try {
+                    profile = JSON.parse(profile)
+                } catch (e) {
+                    done(e)
+                }
+                if (profile.ret === -1) { // Try Catch Error
+                    winston.error('[SSO-QQ]The Profile return -1,skipped.')
+                    return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."))
+                }
+
+                // 存储头像信息
+                let avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2 // Set avatar image
+                avatar = avatar.replace('http://', 'https://')
+                // 如果用户已经登录，那么我们就绑定他
+                if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
+                    // 如果用户想重复绑定的话，我们就拒绝他。
+                    OAuth.hasQQID(profile.id, function (err, res) {
+                        if (err) {
+                            winston.error(err)
+                            return done(err)
+                        } else {
+                            if (res) {
+                                winston.error('[sso-qq] qqid:' + profile.id + 'is binded.')
+                                // qqid is exist
+                                return done(new Error('[[error:sso-multiple-association]]'))
+                            } else {
+                                User.setUserField(req.user.uid, 'qqid', profile.id)
+                                db.setObjectField('qqid:uid', profile.id, req.user.uid)
+                                User.setUserField(req.user.uid, 'qqpic', avatar)
+                                winston.info('[sso-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')')
+                                return done(null, req.user)
+                            }
+                        }
+
+                    })
+                } else {
+                    // 登录方法
+                    var email = profile.id + '@noreply.qq.com'
+                    OAuth.login(profile.id, profile.nickname, avatar, email, function (err, user) { // 3.29 add avatar
+                        if (err) {
+                            return done(err)
+                        } else {
+
+                            // Require collection of email
+                            if (email.endsWith('@norelpy.qq.com') || email.endsWith('@noreply.qq.com')) {
+                                req.session.registration = req.session.registration || {}
+                                req.session.registration.uid = user.uid
+                                req.session.registration.qqid = profile.id
+                            }
+                            authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
+                                if (err) {
+                                    return done(err)
+                                } else {
+                                    return done(null, user)
+                                }
+                            })
 
 
-            passportOAuth.Strategy.prototype.userProfile = function (accessToken, done) {
-                // If your OAuth provider requires the access token to be sent in the query  parameters
-                // instead of the request headers, comment out the next line:
-                this._oauth2._useAuthorizationHeaderForGET = true;
 
-                this._oauth2.get(constants.userRoute, accessToken, (err, body/* , res */) => {
-                    if (err) {
-                        return done(err);
-                    }
+                        }
+                    })
+                }
+            }))
 
-                    try {
-                        const json = JSON.parse(body);
-                        OAuth.parseUserReturn(json, (err, profile) => {
-                            if (err) return done(err);
-                            profile.provider = constants.name;
-
-                            done(null, profile);
-                        });
-                    } catch (e) {
-                        done(e);
-                    }
-                });
-            };
-
-
-            opts.passReqToCallback = true;
-
-            passport.use(constants.name, new passportOAuth(opts, async (req, token, secret, profile, done) => {
-                const user = await OAuth.login({
-                    oAuthid: profile.id,
-                    handle: profile.displayName,
-                    email: profile.emails[0].value,
-                    isAdmin: profile.isAdmin,
-                });
-
-                authenticationController.onSuccessfulLogin(req, user.uid);
-                done(null, user);
-            }));
-
+            // 定义本插件的一些信息
             strategies.push({
                 name: constants.name,
                 url: `/auth/${constants.name}`,
                 callbackURL: `/auth/${constants.name}/callback`,
-                icon: 'fa-check-square',
+                icon: 'fa-qq',
                 labels: {
                     login: '[[oauth2-qq:login]]',
                     register: '[[oauth2-qq:login]]',
                 },
                 color: '#1DA1F2',
-                scope: (constants.scope || '').split(','),
-            });
+                scope: 'get_user_info'
+            })
+
                 callback(null, strategies);
         });
 
@@ -205,81 +205,120 @@
         }
     };
 
-    OAuth.parseUserReturn = function (data, callback) {
-        // Alter this section to include whatever data is necessary
-        // NodeBB *requires* the following: id, displayName, emails.
-        // Everything else is optional.
 
-        // Find out what is available by uncommenting this line:
-        // console.log(data);
+    OAuth.hasQQID = function (qqid, callback) {
+        db.isObjectField(`${constants.name}id:uid`, qqid, function (err, res) {
+            if (err) {
+                callback(err)
+            } else {
+                callback(null, res)
+            }
+        })
+    }
 
-        const profile = {};
-        profile.id = data.id;
-        profile.displayName = data.name;
-        profile.emails = [{ value: data.email }];
 
-        // Do you want to automatically make somebody an admin? This line might help you do that...
-        // profile.isAdmin = data.isAdmin ? true : false;
+    OAuth.getAssociation = function (data, callback) {
+        User.getUserField(data.uid, `${constants.name}id`, function (err, qqid) {
+            if (err) {
+                return callback(err, data)
+            }
 
-        // Delete or comment out the next TWO (2) lines when you are ready to proceed
-        process.stdout.write('===\nAt this point, you\'ll need to customise the above section to id, displayName, and emails into the "profile" object.\n===');
-        return callback(new Error('Congrats! So far so good -- please see server log for details'));
+            if (qqid) {
+                data.associations.push({
+                    associated: true,
+                    deauthUrl: nconf.get('url') + '/deauth/' + constants.name,
+                    name: constants.name,
+                    icon: 'fa-qq'
+                })
+            } else {
+                data.associations.push({
+                    associated: false,
+                    url: nconf.get('url') + '/auth/' + constants.name,
+                    name: constants.name,
+                    icon: 'fa-qq'
+                })
+            }
 
-        // eslint-disable-next-line
-        callback(null, profile);
+            callback(null, data)
+        })
     };
 
-    OAuth.login = async (payload) => {
-        let uid = await OAuth.getUidByOAuthid(payload.oAuthid);
-        if (uid !== null) {
-            // Existing User
-            return ({
-                uid: uid,
-            });
-        }
 
-        // Check for user via email fallback
-        uid = await User.getUidByEmail(payload.email);
-        if (!uid) {
-            /**
-                 * The email retrieved from the user profile might not be trusted.
-                 * Only you would know — it's up to you to decide whether or not to:
-                 *   - Send the welcome email which prompts for verification (default)
-                 *   - Bypass the welcome email and automatically verify the email (commented out, below)
-                 */
-            const { email } = payload;
-
-            // New user
-            uid = await User.create({
-                username: payload.handle,
-                email, // if you uncomment the block below, comment this line out
-            });
-
-            // Automatically confirm user email
-            // await User.setUserField(uid, 'email', email);
-            // await UserEmail.confirmByUid(uid);
-        }
-
-        // Save provider-specific information to the user
-        await User.setUserField(uid, `${constants.name}Id`, payload.oAuthid);
-        await db.setObjectField(`${constants.name}Id:uid`, payload.oAuthid, uid);
-
-        if (payload.isAdmin) {
-            await Groups.join('administrators', uid);
-        }
-
-        return {
-            uid: uid,
-        };
+    OAuth.getUidByQQid = function (oAuthid, callback) {
+        db.getObjectField('qqid:uid', oAuthid, function (err, uid) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, uid);
+            }
+        });
     };
+    
 
-    OAuth.getUidByOAuthid = async oAuthid => db.getObjectField(`${constants.name}Id:uid`, oAuthid);
+    OAuth.login = function (qqID, username, avatar, email, callback) {
+        OAuth.getUidByQQid(qqID, function (err, uid) {
+            if (err) {
+                return callback(err)
+            }
+
+            // winston.verbose("[SSO-QQ]uid:" + uid);
+            if (uid !== null) {
+                // Existing User
+                winston.info('[SSO-QQ]User:' + uid + ' is logged via sso-qq')
+                User.setUserField(uid, 'qqpic', avatar) // 更新头像
+                callback(null, {
+                    uid: uid
+                })
+            } else {
+                // 为了放置可能导致的修改用户数据，结果重新建立了一个账户的问题，所以我们给他一个默认邮箱
+                winston.info("[SSO-QQ]User isn't Exist.Try to Creat a new account.")
+                winston.info("[SSO-QQ]New Account's Username：" + username + ' and openid:' + qqID)
+                // New User
+                // From SSO-Twitter
+                User.create({
+                    username: username,
+                    email: email
+                }, function (err, uid) {
+                    if (err) {
+                        User.create({
+                            username: 'qq-' + qqID,
+                            email: email
+                        }, function (err, uid) {
+                            if (err) {
+                                return callback(err)
+                            } else {
+                                // Save qq-specific information to the user
+                                User.setUserField(uid, 'qqid', qqID)
+                                db.setObjectField('qqid:uid', qqID, uid)
+                                // Save their photo, if present
+                                User.setUserField(uid, 'picture', avatar)
+                                User.setUserField(uid, 'qqpic', avatar)
+                                callback(null, {
+                                    uid: uid
+                                })
+                            }
+                        })
+                    } else {
+                        // Save qq-specific information to the user
+                        User.setUserField(uid, 'qqid', qqID)
+                        db.setObjectField('qqid:uid', qqID, uid)
+                        // Save their photo, if present
+                        User.setUserField(uid, 'picture', avatar)
+                        User.setUserField(uid, 'qqpic', avatar)
+                        callback(null, {
+                            uid: uid
+                        })
+                    }
+                })
+            }
+        })
+    }
 
     OAuth.deleteUserData = function (data, callback) {
         async.waterfall([
-            async.apply(User.getUserField, data.uid, `${constants.name}Id`),
+            async.apply(User.getUserField, data.uid, `${constants.name}id`),
             function (oAuthIdToDelete, next) {
-                db.deleteObjectField(`${constants.name}Id:uid`, oAuthIdToDelete, next);
+                db.deleteObjectField(`${constants.name}id:uid`, oAuthIdToDelete, next);
             },
         ], (err) => {
             if (err) {
@@ -291,28 +330,90 @@
         });
     };
 
-    // If this filter is not there, the deleteUserData function will fail when getting the oauthId for deletion.
-    OAuth.whitelistFields = function (params, callback) {
-        params.whitelist.push(`${constants.name}Id`);
-        callback(null, params);
-    };
 
-    OAuth.load = async function (params) {
-/*
-        const settings = await meta.settings.get('oauth2-qq');
-        if (!settings) {
-            winston.warn(`[plugins/${pluginData.nbbId}] Settings not set or could not be retrieved!`);
-            return;
+    OAuth.prepareInterstitial = (data, callback) => {
+        // Only execute if:
+        //   - uid and qqid are set in session
+        //   - email ends with "@noreply.qq.com"
+        if (data.userData.hasOwnProperty('uid') && data.userData.hasOwnProperty('qqid')) {
+            User.getUserField(data.userData.uid, 'email', function (err, email) {
+                if (err) {
+                    return callback(err)
+                }
+                if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
+                    data.interstitials.push({
+                        template: 'partials/sso-qq/email.tpl',
+                        data: {},
+                        callback: QQ.storeAdditionalData
+                    })
+                }
+
+                callback(null, data)
+            })
+        } else {
+            callback(null, data)
         }
+    }
+    OAuth.get = (data, callback) => {
+        if (data.type === 'qq') {
+            OAuth.getQQPicture(data.uid, function (err, QQPicture) {
+                if (err) {
+                    winston.error(err)
+                    return callback(null, data)
+                }
+                if (QQPicture == null) {
+                    winston.error('[sso-qq]uid:' + data.uid + 'is invalid,skipping...')
+                    return callback(null, data)
+                }
+                data.picture = QQPicture
+                callback(null, data)
+            })
+        } else {
+            callback(null, data)
+        }
+    }
+    OAuth.list = (data, callback) => {
+        OAuth.getQQPicture(data.uid, function (err, QQPicture) {
+            if (err) {
+                winston.error(err)
+                return callback(null, data)
+            }
+            if (QQPicture == null) {
+                winston.error('[sso-qq]uid:' + data.uid + 'is invalid,skipping...')
+                return callback(null, data)
+            }
+            data.pictures.push({
+                type: 'qq',
+                url: QQPicture,
+                text: 'QQ头像'
+            })
+            callback(null, data)
+        })
+    }
 
+    OAuth.getQQPicture = function (uid, callback) {
+        User.getUserField(uid, 'qqpic', function (err, pic) {
+            if (err) {
+                return callback(err)
+            }
+            callback(null, pic)
+        })
+    }
 
-        pluginSettings = settings;
-        
-            const routeHelpers = require.main.require('./src/routes/helpers');
-            routeHelpers.setupAdminPageRoute(params.router, `/admin/plugins/${pluginData.nbbId}`, renderAdmin);
-        
-            */
-    };
+    OAuth.storeAdditionalData = function (userData, data, callback) {
+        async.waterfall([
+            // Reset email confirm throttle
+            async.apply(db.delete, 'uid:' + userData.uid + ':confirm:email:sent'),
+            async.apply(User.getUserField, userData.uid, 'email'),
+            function (email, next) {
+                // Remove the old email from sorted set reference
+                email = email.toLowerCase()
+                db.sortedSetRemove('email:uid', email, next)
+            },
+            async.apply(User.setUserField, userData.uid, 'email', data.email),
+            async.apply(User.email.sendValidationEmail, userData.uid, data.email)
+        ], callback)
+    }
 
     module.exports = OAuth;
 

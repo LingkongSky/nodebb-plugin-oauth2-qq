@@ -1,6 +1,6 @@
 {
 	"id": "nodebb-plugin-oauth2-qq",
-	"url": "https://github.com/NodeBB/nodebb-plugin-oauth2-qq",
+	"url": "https://github.com/LingkongSky/nodebb-plugin-oauth2-qq",
 	"library": "./library.js",
 	"hooks": [
 		{
@@ -28,8 +28,8 @@
 			"method": "deleteUserData"
 		},
 		{
-			"hook": "filter:user.whitelistFields",
-			"method": "appendUserHashWhitelist"
+			"hook": "filter:register.interstitial",
+			"method": "prepareInterstitial"
 		}
 	],
 	"staticDirs": {
