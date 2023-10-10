@@ -2,7 +2,7 @@
 (function (module) {
 
     const User = require.main.require('./src/user');
-   // const Groups = require.main.require('./src/groups');
+    // const Groups = require.main.require('./src/groups');
     const db = require.main.require('./src/database');
     const authenticationController = require.main.require('./src/controllers/authentication');
     const meta = require.main.require('./src/meta');
@@ -14,11 +14,11 @@
     const nconf = require.main.require('nconf');
     const winston = require.main.require('winston');
 
-    
+
 
     const OAuth = {};
     let configOk = false;
-  
+
 
 
     const constants = Object.freeze({
@@ -30,15 +30,15 @@
 
     meta.settings.get('oauth2-qq', function (err, settings) {
 
-    if (!constants.name) {
-        winston.error('[sso-oauth] Please specify a name for your OAuth provider (library.js:32)');
-    } else if (!constants.type || (constants.type !== 'oauth' && constants.type !== 'oauth2')) {
-        winston.error('[sso-oauth] Please specify an OAuth strategy to utilise (library.js:31)');
-    } else if (!constants.userRoute) {
-        winston.error('[sso-oauth] User Route required (library.js:31)');
-    } else if (settings.login === 'on') {
-        configOk = true;
-    }
+        if (!constants.name) {
+            winston.error('[sso-oauth] Please specify a name for your OAuth provider (library.js:32)');
+        } else if (!constants.type || (constants.type !== 'oauth' && constants.type !== 'oauth2')) {
+            winston.error('[sso-oauth] Please specify an OAuth strategy to utilise (library.js:31)');
+        } else if (!constants.userRoute) {
+            winston.error('[sso-oauth] User Route required (library.js:31)');
+        } else if (settings.login === 'on') {
+            configOk = true;
+        }
     });
 
     OAuth.init = function (data, callback) {
@@ -90,13 +90,13 @@
                 })
             })
         })
-            callback();
+        callback();
     };
 
     OAuth.addMenuItem = function (custom_header, callback) {
         custom_header.authentication.push({
             route: "/plugins/oauth2-qq",
-            icon: 'fa-qq',
+            icon: 'fa-brands fa-qq',
             name: 'OAuth2 QQ',
         });
 
@@ -109,95 +109,98 @@
     OAuth.getStrategy = function (strategies, callback) {
         if (configOk) {
 
-          //  passportOAuth = require('passport-oauth')['OAuth2Strategy'];
-        meta.settings.get('oauth2-qq', function (err, settings){
-  
-            passport.use(constants.name, new QQStrategy({
-                clientID: settings.id, //读取管理面板设置
-                clientSecret: settings.key, // don't change this line
-                callbackURL: nconf.get('url') + "/auth/" + constants.name +"/callback",
-                passReqToCallback: true
-                    }, function (req, accessToken, refreshToken, profile, done) {
-                try {
-                    profile = JSON.parse(profile)
-                } catch (e) {
-                    done(e)
-                }
-                if (profile.ret === -1) { // Try Catch Error
-                    winston.error('[OAuth2-qq]The Profile return -1,skipped.')
-                    return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."))
-                }
+            //  passportOAuth = require('passport-oauth')['OAuth2Strategy'];
+            meta.settings.get('oauth2-qq', function (err, settings) {
 
-                // 存储头像信息
-                let avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2 // Set avatar image
-                avatar = avatar.replace('http://', 'https://');
-                // 如果用户已经登录，那么我们就绑定他
-                if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
-                    // 如果用户想重复绑定的话，我们就拒绝他。
-                    OAuth.hasQQID(profile.id, function (err, res) {
-                        if (err) {
-                            winston.error(err)
-                            return done(err)
-                        } else {
-                            if (res) {
-                                winston.error('[OAuth2-qq] qqid:' + profile.id + 'is binded.')
-                                // qqid is exist
-                                return done(new Error('[[error:sso-multiple-association]]'))
+                passport.use(constants.name, new QQStrategy({
+                    clientID: settings.id, //读取管理面板设置
+                    clientSecret: settings.key, // don't change this line
+                    callbackURL: nconf.get('url') + "/auth/" + constants.name + "/callback",
+                    passReqToCallback: true
+                }, function (req, accessToken, refreshToken, profile, done) {
+                    try {
+                        profile = JSON.parse(profile)
+                    } catch (e) {
+                        done(e)
+                    }
+                    if (profile.ret === -1) { // Try Catch Error
+                        winston.error('[OAuth2-qq]The Profile return -1,skipped.')
+                        return done(new Error("There's something wrong with your request or QQ Connect API.Please try again."))
+                    }
+
+                    // 存储头像信息
+                    let avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2 // Set avatar image
+                    avatar = avatar.replace('http://', 'https://');
+                    // 如果用户已经登录，那么我们就绑定他
+                    if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
+                        // 如果用户想重复绑定的话，我们就拒绝他。
+                        OAuth.hasQQID(profile.id, function (err, res) {
+                            if (err) {
+                                winston.error(err)
+                                return done(err)
                             } else {
-                                User.setUserField(req.user.uid, 'qqid', profile.id)
-                                db.setObjectField('qqid:uid', profile.id, req.user.uid)
-                                User.setUserField(req.user.uid, 'qqpic', avatar)
-                                winston.info('[OAuth2-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')')
-                                return done(null, req.user)
-                            }
-                        }
-
-                    })
-                } else {
-                    // 登录方法
-                    var email = profile.id + '@noreply.qq.com'
-                    OAuth.login(profile.id, profile.nickname, avatar, email, function (err, user) { // 3.29 add avatar
-                        if (err) {
-                            return done(err)
-                        } else {
-
-                            // Require collection of email
-                            if (email.endsWith('@norelpy.qq.com') || email.endsWith('@noreply.qq.com')) {
-                                req.session.registration = req.session.registration || {}
-                                req.session.registration.uid = user.uid
-                                req.session.registration.qqid = profile.id
-                            }
-                            authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
-                                if (err) {
-                                    return done(err)
+                                if (res) {
+                                    winston.error('[OAuth2-qq] qqid:' + profile.id + 'is binded.')
+                                    // qqid is exist
+                                    return done(new Error('[[error:sso-multiple-association]]'))
                                 } else {
-                                    return done(null, user)
+                                    User.setUserField(req.user.uid, 'qqid', profile.id)
+                                    db.setObjectField('qqid:uid', profile.id, req.user.uid)
+                                    User.setUserField(req.user.uid, 'qqpic', avatar)
+                                    winston.info('[OAuth2-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')')
+                                    return done(null, req.user)
                                 }
-                            })
+                            }
+
+                        })
+                    } else {
+                        // 登录方法
+                        var email = profile.id + '@noreply.qq.com'
+                        OAuth.login(profile.id, profile.nickname, avatar, email, function (err, user) { // 3.29 add avatar
+                            if (err) {
+                                return done(err)
+                            } else {
+
+                                // Require collection of email
+                                if (email.endsWith('@norelpy.qq.com') || email.endsWith('@noreply.qq.com')) {
+                                    req.session.registration = req.session.registration || {}
+                                    req.session.registration.uid = user.uid
+                                    req.session.registration.qqid = profile.id
+                                }
+                                authenticationController.onSuccessfulLogin(req, user.uid, function (err) {
+                                    if (err) {
+                                        return done(err)
+                                    } else {
+                                        return done(null, user)
+                                    }
+                                })
 
 
 
-                        }
-                    })
-                }
-            }))
+                            }
+                        })
+                    }
+                }))
 
-            // 定义本插件的一些信息
-            strategies.push({
-                name: constants.name,
-                url: `/auth/${constants.name}`,
-                callbackURL: `/auth/${constants.name}/callback`,
-                icon: 'fa-qq',
-                labels: {
-                    login: '[[oauth2-qq:login]]',
-                    register: '[[oauth2-qq:login]]',
-                },
-                color: '#1DA1F2',
-                scope: 'get_user_info'
-            })
+                // 定义本插件的一些信息
+                strategies.push({
+                    name: constants.name,
+                    url: `/auth/${constants.name}`,
+                    callbackURL: `/auth/${constants.name}/callback`,
+                    icon: 'fa-brands fa-qq',
+                    icons: {
+                        normal: 'fa-brands fa-qq',
+                        square: 'fa-brands fa-qq',
+                    },
+                    color: '#25292f',
+                    labels: {
+                        login: '[[oauth2-qq:login]]',
+                        register: '[[oauth2-qq:login]]',
+                    },
+                })
 
                 callback(null, strategies);
-        });
+            });
 
         } else {
             callback(new Error('OAuth Configuration is invalid'));
@@ -252,7 +255,7 @@
             }
         });
     };
-    
+
 
     OAuth.login = function (qqID, username, avatar, email, callback) {
 
@@ -277,12 +280,12 @@
                 // From SSO-Twitter
                 User.create({
                     username: username,
-               //     email: email
+                    //     email: email
                 }, function (err, uid) {
                     if (err) {
                         User.create({
                             username: 'qq-' + qqID,
-                      //      email: email
+                            //      email: email
                         }, function (err, uid) {
                             if (err) {
                                 return callback(err)
@@ -291,8 +294,8 @@
                                 User.setUserField(uid, 'qqid', qqID);
                                 db.setObjectField('qqid:uid', qqID, uid);
                                 // Save their photo, if present
-                            //    User.setUserField(uid, 'picture', avatar);
-                             //   User.setUserField(uid, 'qqpic', avatar);
+                                //    User.setUserField(uid, 'picture', avatar);
+                                //   User.setUserField(uid, 'qqpic', avatar);
                                 callback(null, {
                                     uid: uid
                                 })
@@ -303,8 +306,8 @@
                         User.setUserField(uid, 'qqid', qqID);
                         db.setObjectField('qqid:uid', qqID, uid);
                         // Save their photo, if present
-                      //  User.setUserField(uid, 'picture', avatar);
-                      //  User.setUserField(uid, 'qqpic', avatar);
+                        //  User.setUserField(uid, 'picture', avatar);
+                        //  User.setUserField(uid, 'qqpic', avatar);
                         callback(null, {
                             uid: uid
                         })
@@ -343,13 +346,13 @@
                     return callback(err)
                 }
 
-               /* if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
-                    data.interstitials.push({
-                        template: 'partials/oauth2-qq/email.tpl',
-                        data: {},
-                        callback: OAuth.storeAdditionalData
-                    })
-                }*/
+                /* if (email && (email.endsWith('@noreply.qq.com') || email.endsWith('@norelpy.qq.com'))) {
+                     data.interstitials.push({
+                         template: 'partials/oauth2-qq/email.tpl',
+                         data: {},
+                         callback: OAuth.storeAdditionalData
+                     })
+                 }*/
 
                 callback(null, data)
             })
