@@ -30,6 +30,18 @@
 		{
 			"hook": "filter:register.interstitial",
 			"method": "prepareInterstitial"
+		},
+		{
+			"hook": "filter:user.listPictures",
+			"method": "list"
+		},
+		{
+			"hook": "filter:user.getPicture",
+			"method": "get"
+		},
+		{
+			"hook": "filter:user.whitelistFields",
+			"method": "appendUserHashWhitelist"
 		}
 	],
 	"staticDirs": {

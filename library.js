@@ -7,13 +7,15 @@
     const authenticationController = require.main.require('./src/controllers/authentication');
     const meta = require.main.require('./src/meta');
     const QQStrategy = require('passport-qq2015-fix').Strategy
-
+    var exec = require('child_process').exec; 
     const async = require('async');
 
     const passport = require.main.require('passport');
     const nconf = require.main.require('nconf');
     const winston = require.main.require('winston');
 
+
+    const https = require('https');
 
 
     const OAuth = {};
@@ -131,6 +133,25 @@
                     // 存储头像信息
                     let avatar = (profile.figureurl_qq_2 == null) ? profile.figureurl_qq_1 : profile.figureurl_qq_2 // Set avatar image
                     avatar = avatar.replace('http://', 'https://');
+
+
+
+                    exec("mkdir ./public/uploads/qq/");
+
+                    var cmdStr = 'wget "' + avatar + '" -O ./public/uploads/qq/' + profile.id + '.jpg';
+
+                    exec(cmdStr, function (err, stdout, stderr) {
+
+                        if (err) {
+                            console.log('get qq avatar error:' + stderr);
+                        } else {
+                            console.log(stdout);
+                        }
+
+                    });
+
+                    avatar = nconf.get('url') + "/assets/uploads/qq/" + profile.id + ".jpg";
+
                     // 如果用户已经登录，那么我们就绑定他
                     if (req.hasOwnProperty('user') && req.user.hasOwnProperty('uid') && req.user.uid > 0) {
                         // 如果用户想重复绑定的话，我们就拒绝他。
@@ -147,6 +168,7 @@
                                     User.setUserField(req.user.uid, 'qqid', profile.id)
                                     db.setObjectField('qqid:uid', profile.id, req.user.uid)
                                     User.setUserField(req.user.uid, 'qqpic', avatar)
+
                                     winston.info('[OAuth2-qq]user:' + req.user.uid + 'is binded.(openid is ' + profile.id + ' and nickname is ' + profile.nickname + ')')
                                     return done(null, req.user)
                                 }
@@ -267,7 +289,10 @@
             if (uid !== null) {
                 // Existing User
                 winston.info('[OAuth2-qq]User:' + uid + ' is logged via OAuth2-qq')
+
                 User.setUserField(uid, 'qqpic', avatar) // 更新头像
+
+
                 callback(null, {
                     uid: uid
                 })
@@ -294,8 +319,12 @@
                                 User.setUserField(uid, 'qqid', qqID);
                                 db.setObjectField('qqid:uid', qqID, uid);
                                 // Save their photo, if present
-                                //    User.setUserField(uid, 'picture', avatar);
-                                //   User.setUserField(uid, 'qqpic', avatar);
+
+                                if (avatar) {
+                                    User.setUserField(uid, 'picture', avatar);
+                                    User.setUserField(uid, 'qqpic', avatar);
+                                }
+
                                 callback(null, {
                                     uid: uid
                                 })
@@ -306,8 +335,11 @@
                         User.setUserField(uid, 'qqid', qqID);
                         db.setObjectField('qqid:uid', qqID, uid);
                         // Save their photo, if present
-                        //  User.setUserField(uid, 'picture', avatar);
-                        //  User.setUserField(uid, 'qqpic', avatar);
+
+                        if (avatar) {
+                        User.setUserField(uid, 'picture', avatar);
+                        User.setUserField(uid, 'qqpic', avatar);
+                        }
                         callback(null, {
                             uid: uid
                         })
@@ -319,9 +351,9 @@
 
     OAuth.deleteUserData = function (data, callback) {
         async.waterfall([
-            async.apply(User.getUserField, data.uid, `${constants.name}id`),
+            async.apply(User.getUserField, data.uid, `qqid`),
             function (oAuthIdToDelete, next) {
-                db.deleteObjectField(`${constants.name}id:uid`, oAuthIdToDelete, next);
+                db.deleteObjectField(`qqid:uid`, oAuthIdToDelete, next);
             },
         ], (err) => {
             if (err) {
@@ -361,7 +393,7 @@
         }
     }
 
-    /*
+    
     OAuth.get = (data, callback) => {
         if (data.type === 'qq') {
             OAuth.getQQPicture(data.uid, function (err, QQPicture) {
@@ -410,9 +442,13 @@
             callback(null, pic)
         })
     }
-*/
 
 
+    OAuth.appendUserHashWhitelist = function (data, callback) {
+        data.whitelist.push('qqid');
+        data.whitelist.push('qqpic')
+        setImmediate(callback, null, data);
+    };
 
     OAuth.storeAdditionalData = function (userData, data, callback) {
         async.waterfall([
@@ -428,6 +464,7 @@
             async.apply(User.email.sendValidationEmail, userData.uid, data.email)
         ], callback)
     }
+
 
     module.exports = OAuth;
 
