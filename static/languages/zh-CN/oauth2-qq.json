@@ -3,5 +3,12 @@
     "alertInfo": "前往<a href='https://connect.qq.com/manage.html#/'>腾讯互联</a>注册<strong>第三方网站</strong>并将你的APP ID与密钥粘贴到下面。",
     "leadInfo": "在表单中写入你的APP ID，密钥及回调地址。",
     "enableLogin": "启用QQ互联登录",
-    "login": "通过QQ登录"
+    "login": "通过QQ登录",
+    "profileError": "用户信息返回 -1,跳过",
+    "oauthError": "在向QQ Connect API请求的过程中发生了错误。请重试",
+    "userExist": "这个QQ已经被注册过了",
+    "configError": "OAuth配置无效",
+    "createUser": "用户不存在。尝试为您创建新账户",
+    "removeError": "无法移除这个用户的OAuthId. Error:",
+    "uidInvalid": "uid无效,跳过..."
 }

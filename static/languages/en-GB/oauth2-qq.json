@@ -3,5 +3,12 @@
     "alertInfo": "Register a new <strong>GitHub Application</strong> via <a href='https: //github.com/settings/developers'>Developer Applications</a> and then paste your application details here.",
     "leadInfo": "write your app ID,Key and Callback URL into the form.",
     "enableLogin": "Enable Login",
-    "login": "Login with QQ"
+    "login": "Login with QQ",
+    "profileError": "The Profile return -1,skipped",
+    "oauthError": "There's something wrong with your request or QQ Connect API.Please try again",
+    "userExist": "The QQ has been registered",
+    "configError": "OAuth Configuration is invalid",
+    "createUser": "User isn't Exist.Try to Creat a new account",
+    "removeError": "Could not remove OAuthId data for the user. Error:",
+    "uidInvalid": "uid is invalid,skipping..."
 }
