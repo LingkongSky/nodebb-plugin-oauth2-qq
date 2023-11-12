@@ -15,8 +15,8 @@
 
     const OAuth = {};
     let configOk = false;
-
-
+    let APPconfigOK = false;
+    let appCallbackUrl = "";
 
     const constants = Object.freeze({
         type: 'oauth2', 
@@ -28,6 +28,10 @@
     meta.settings.get('oauth2-qq', function (err, settings) {
     if (settings.login === 'on') {
             configOk = true;
+        }
+        if (settings.appCallbackUrl != null){
+            APPconfigOK = true;
+            appCallbackUrl = settings.appCallbackUrl;
         }
     });
 
@@ -66,7 +70,7 @@
 
         
         
-        if (nconf.get('appCallbackUrl') != null ){
+        if (APPconfigOK){
 
         //app验证地址
         data.router.get('/auth/qq2', function (req, res) {
@@ -84,7 +88,7 @@
 
             res.render('plugins/oauth2-qq/forward', {
                 code: code,
-                appCallbackUrl: nconf.get('appCallbackUrl')
+                appCallbackUrl: appCallbackUrl
             });
         });
 
