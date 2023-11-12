@@ -8,7 +8,7 @@
     const QQStrategy = require('passport-qq2015-fix').Strategy
     var exec = require('child_process').exec; 
     const async = require('async');
-
+    //const request = require('request')
     const passport = require.main.require('passport');
     const nconf = require.main.require('nconf');
     const winston = require.main.require('winston');
@@ -26,11 +26,11 @@
 
 
     meta.settings.get('oauth2-qq', function (err, settings) {
-
     if (settings.login === 'on') {
             configOk = true;
         }
     });
+
 
     OAuth.init = function (data, callback) {
 
@@ -64,7 +64,39 @@
             next()
         });
 
+        
+        
+        if (nconf.get('appCallbackUrl') != null ){
 
+        //app验证地址
+        data.router.get('/auth/qq2', function (req, res) {
+         if (configOk) {      
+                meta.settings.get('oauth2-qq', function (err, settings) {
+                    res.redirect("https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=" + settings.id + "&redirect_uri=" + nconf.get('url') + "/auth/qq/forward" + "&scope=get_user_info");
+                });
+            } 
+
+        });
+
+        //app验证回调中转地址，负责调起app
+        data.router.get('/auth/qq/forward', function (req, res) {
+            const code = req.query.code;
+
+            res.render('plugins/oauth2-qq/forward', {
+                code: code,
+                appCallbackUrl: nconf.get('appCallbackUrl')
+            });
+        });
+
+
+
+        //app最终回调地址
+        data.router.get('/auth/qq/callback2', function (req, res) {
+            const code = req.query.code;
+            res.redirect(nconf.get('url') + "/auth/qq/callback?code=" + code);
+        });
+
+    }
 
         data.router.post('/deauth/qq', [data.middleware.requireUser, data.middleware.applyCSRF], function (req, res, next) {
             OAuth.deleteUserData({
@@ -97,6 +129,9 @@
 
 
 
+
+
+
     OAuth.getStrategy = function (strategies, callback) {
         if (configOk) {
 
@@ -105,7 +140,7 @@
                 passport.use(constants.name, new QQStrategy({
                     clientID: settings.id, //读取管理面板设置
                     clientSecret: settings.key, 
-                    callbackURL: nconf.get('url') + "/auth/" + constants.name + "/callback",
+                    callbackURL: nconf.get('url') + "/auth/qq/callback",
                     passReqToCallback: true
                 }, function (req, accessToken, refreshToken, profile, done) {
                     try {
@@ -191,9 +226,9 @@
 
                 // 定义本插件的一些信息
                 strategies.push({
-                    name: constants.name,
-                    url: `/auth/${constants.name}`,
-                    callbackURL: `/auth/${constants.name}/callback`,
+                    name: 'qq',
+                    url: `/auth/qq`,
+                    callbackURL: `/auth/qq/callback`,
                     icon: 'fa-brands fa-qq',
                     icons: {
                         normal: 'fa-brands fa-qq',
@@ -216,7 +251,7 @@
 
 
     OAuth.hasQQID = function (qqid, callback) {
-        db.isObjectField(`${constants.name}id:uid`, qqid, function (err, res) {
+        db.isObjectField(`qqid:uid`, qqid, function (err, res) {
             if (err) {
                 callback(err);
             } else {
@@ -227,7 +262,7 @@
 
 
     OAuth.getAssociation = function (data, callback) {
-        User.getUserField(data.uid, `${constants.name}id`, function (err, qqid) {
+        User.getUserField(data.uid, `qqid`, function (err, qqid) {
             if (err) {
                 return callback(err, data);
             }

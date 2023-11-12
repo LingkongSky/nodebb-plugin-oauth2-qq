@@ -10,5 +10,7 @@
     "configError": "OAuth配置无效",
     "createUser": "用户不存在。尝试为您创建新账户",
     "removeError": "无法移除这个用户的OAuthId. Error:",
-    "uidInvalid": "uid无效,跳过..."
+    "uidInvalid": "uid无效,跳过...",
+    "forward": "转跳中...",
+    "clickIt": "或者单击此处进行转跳"
 }

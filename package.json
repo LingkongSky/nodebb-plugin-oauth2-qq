@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-oauth2-qq",
-  "version": "0.4.8",
+  "version": "0.5.0",
   "description": "This plugin work on Nodebb V3.x,support user login & register via Tencent.",
   "main": "library.js",
   "repository": {

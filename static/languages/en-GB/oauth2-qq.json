@@ -10,5 +10,7 @@
     "configError": "OAuth Configuration is invalid",
     "createUser": "User isn't Exist.Try to Creat a new account",
     "removeError": "Could not remove OAuthId data for the user. Error:",
-    "uidInvalid": "uid is invalid,skipping..."
+    "uidInvalid": "uid is invalid,skipping...",
+    "forward": "redirect...",
+    "clickIt": "Click it to redirect"
 }
