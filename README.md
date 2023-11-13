@@ -8,8 +8,13 @@ PS:This plugin can also use in the app(Webview).In app,you need change /auth/qq 
 注：本插件同样适用于app(Webview)端，app验证请将/auth/qq请求改写为/auth/qq2，随后将www.example.com/auth/qq/forward加入到回调域名中，随后认证码会以schema_url&code=xxxxxx的形式在调起app的同时传回，接着开发者在APP中获取所传入code并转发到www.example.com/auth/qq/callback&code=xxxx即可
 
 # SEE ALSO
+
 https://github.com/julianlam/nodebb-plugin-sso-oauth
+
 https://github.com/NodeBB-China/nodebb-plugin-sso-qq-fix
+
 https://github.com/julianlam/nodebb-plugin-sso-google
+
 https://github.com/julianlam/nodebb-plugin-sso-github
+
 https://github.com/NodeBB/nodebb-plugin-quickstart
