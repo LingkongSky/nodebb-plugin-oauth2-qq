@@ -9,7 +9,7 @@
 		</div>
 
         <script>
-        window.location.href = "{appCallbackUrl}&code={code}";
+        window.location.replace("{appCallbackUrl}&code={code}");
         </script>
 	</div>
 </div>

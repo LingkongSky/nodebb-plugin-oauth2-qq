@@ -1,8 +1,10 @@
 {
     "General": "常规",
     "alertInfo": "前往<a href='https://connect.qq.com/manage.html#/'>腾讯互联</a>注册<strong>第三方网站</strong>并将你的APP ID与密钥粘贴到下面。",
+    "appAlertInfo": "如果需要启用App(Webview)登录，请将App Callback Url填入qq的回调地址中，并填写正确的Schema URL<br/>1.APP验证请将/auth/qq请求改写为/auth/qq2<br/>2.将/auth/qq/forward加入到回调域名中<br/>3.随后认证码会以schema_url&code=xxxxxx的形式调起app并传回<br/>4.在APP中获取传入code并转发至/auth/qq/callback&code=xxxx",
     "leadInfo": "在表单中写入你的APP ID，密钥及回调地址。",
     "enableLogin": "启用QQ互联登录",
+    "enableAppLogin": "启用QQ互联登录(APP)",
     "login": "通过QQ登录",
     "profileError": "用户信息返回 -1,跳过",
     "oauthError": "在向QQ Connect API请求的过程中发生了错误。请重试",

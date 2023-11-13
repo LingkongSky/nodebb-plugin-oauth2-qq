@@ -1,8 +1,10 @@
 {
     "General": "General",
     "alertInfo": "Register a new <strong>GitHub Application</strong> via <a href='https: //github.com/settings/developers'>Developer Applications</a> and then paste your application details here.",
+    "appAlertInfo": "If you need enable the APP(Webview) login,please add the APP Callback URL in the tencent callback url list,and wirte the right schema url.<br/>In app,you need change /auth/qq to /auth/qq2 <br/>add the www.example.com/auth/qq/forward in your callbackurl list.<br/>After that,the authorize code would transport in your app with the type of schema_url&code=xxxx<br/>then you just get the code in your app and redirect it to the url www.example.com/auth/qq/callback.",
     "leadInfo": "write your app ID,Key and Callback URL into the form.",
     "enableLogin": "Enable Login",
+    "enableAppLogin": "Enable APP Login",
     "login": "Login with QQ",
     "profileError": "The Profile return -1,skipped",
     "oauthError": "There's something wrong with your request or QQ Connect API.Please try again",

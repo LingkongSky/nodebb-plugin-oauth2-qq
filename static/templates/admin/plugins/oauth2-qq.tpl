@@ -30,14 +30,31 @@
 						<input type="text" disabled  id="setting-url" name="url" title="Callback URL" class="form-control" placeholder="{baseUrl}/auth/qq/callback">
 					</div>
 
+
+					<div class="form-check form-switch">
+						<input type="checkbox" class="form-check-input" id="login" name="login">
+						<label for="setting-login" class="form-check-label">[[oauth2-qq:enableLogin]]</label>
+					</div>
+
+
+					<div class="alert alert-info">
+					[[oauth2-qq:appAlertInfo]]
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label" for="setting-app-url">App Callback URL</label>
+						<input type="text" disabled  id="setting-app-url" name="app-url" title="App Callback URL" class="form-control" placeholder="{baseUrl}/auth/qq/forward">
+					</div>
+
 					<div class="mb-3">
 						<label class="form-label" for="setting-appCallbackUrl">APP Callback Schema</label>
 						<input type="text" id="setting-appCallbackUrl" name="appCallbackUrl" title="APP Schema URL" class="form-control" placeholder="APP Schema URL">
 					</div>
 
+
 					<div class="form-check form-switch">
-						<input type="checkbox" class="form-check-input" id="login" name="login">
-						<label for="setting-login" class="form-check-label">[[oauth2-qq:enableLogin]]</label>
+						<input type="checkbox" class="form-check-input" id="app-login" name="appLogin">
+						<label for="setting-app-login" class="form-check-label">[[oauth2-qq:enableAppLogin]]</label>
 					</div>
 				</div>
 

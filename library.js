@@ -29,7 +29,7 @@
     if (settings.login === 'on') {
             configOk = true;
         }
-        if (settings.appCallbackUrl != null){
+        if (settings.appCallbackUrl != null && settings.appLogin){
             APPconfigOK = true;
             appCallbackUrl = settings.appCallbackUrl;
         }
@@ -90,14 +90,6 @@
                 code: code,
                 appCallbackUrl: appCallbackUrl
             });
-        });
-
-
-
-        //app最终回调地址
-        data.router.get('/auth/qq/callback2', function (req, res) {
-            const code = req.query.code;
-            res.redirect(nconf.get('url') + "/auth/qq/callback?code=" + code);
         });
 
     }
