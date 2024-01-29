@@ -1,11 +1,11 @@
 {
   "name": "nodebb-plugin-oauth2-qq",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "This plugin work on Nodebb V3.x,support user login & register via Tencent.",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LingkongSky/nodebb-plugin-oauth2-qq"
+    "url": "git+https://github.com/LingkongSky/nodebb-plugin-oauth2-qq.git"
   },
   "keywords": [
     "nodebb",
@@ -24,6 +24,9 @@
       "eslint --fix",
       "git add"
     ]
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "MIT",
   "bugs": {
@@ -44,7 +47,6 @@
     "passport-qq2015-fix": "2.0.1"
   },
   "dependencies": {
-    "passport-oauth": "^1.0.0",
     "passport-qq2015-fix": "^2.0.1"
   }
 }
