@@ -5,7 +5,7 @@
     const db = require.main.require('./src/database');
     const authenticationController = require.main.require('./src/controllers/authentication');
     const meta = require.main.require('./src/meta');
-    const QQStrategy = require('passport-qq2015-fix').Strategy
+    const QQStrategy = require('./passport-qq2015-fix').Strategy
     var exec = require('child_process').exec; 
     const async = require('async');
     //const request = require('request')
