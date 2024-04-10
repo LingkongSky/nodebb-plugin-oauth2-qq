@@ -7,8 +7,8 @@
 const util = require('util');
 const querystring = require('querystring');
 const passport = require('passport-strategy');
-//const request = require('request');
-const axios = require('axios');
+const request = require('request');
+//const axios = require('axios');
 
 function QQTokenStrategy(options, verify) {
   if (typeof options == 'function') {
@@ -69,7 +69,8 @@ function QQTokenStrategy(options, verify) {
  */
 util.inherits(QQTokenStrategy, passport.Strategy);
 
-/*
+
+
 const get = (url) => {
   return new Promise((res, rej) => {
     request({
@@ -82,8 +83,8 @@ const get = (url) => {
 
   });
 }
-*/
 
+/*
 const get = (url) => {
   return new Promise((resolve, reject) => {
     axios.get(url)
@@ -95,18 +96,8 @@ const get = (url) => {
       });
   });
 };
+*/
 
-/*  $.ajax({
-    url: url,
-    type: 'get',
-    async: false,
-    success: function (res1) {
-      res(res1);
-    },
-    error: function (xhr) {
-      rej(xhr)
-    },
-  });*/ 
 QQTokenStrategy.prototype.authenticate = function (req, options) {
   const authorizationCodeUrlParams = Object.assign({}, this._authorizationCodeUrlParams);
   const accessTokenUrlParams = Object.assign({}, this._accessTokenUrlParams);
@@ -178,7 +169,6 @@ QQTokenStrategy.prototype.authenticate = function (req, options) {
           //否则就返回成原来的形式
           this._verify(access_token, refresh_token, profile, verified);
         }
-        
       }).catch(err => {
         //把错误抛出，方便调试
         console.log(`[passport-qq2015]catch a error;`);
