@@ -86,13 +86,13 @@ const get = (url) => {
 
 /*
 const get = (url) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((res, rej) => {
     axios.get(url)
       .then(response => {
-        resolve(response.data);
+        res(response.data);
       })
       .catch(error => {
-        reject(error);
+        rej(error);
       });
   });
 };
